@@ -54,8 +54,9 @@ if __name__ == '__main__':
         quit()
     
     # Code provenance
-    s4bbrepo = git.Repo('s4bb/')
-    print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
+    #s4bbrepo = git.Repo('s4bb/')
+    #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
+    print('s4bb version: local files only (no git)')
     print('namaster version: {}'.format(nmt.__version__))
     
     # Input maps to power spectrum estimator
