@@ -278,8 +278,8 @@ def trim_maps(apod, maps, threshold=1e-6):
 def spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
     """Returns HDF5 file name for spectra"""
 
-    filename = '/global/cfs/cdirs/cmbs4/chile_optimization/analysis/cbischoff/phase2/spectra/phase2_spec_'
-    #filename = 'spectra/phase2_spec_' #CHANGED TO FIND COLINS FILES! 
+    #filename = '/global/cfs/cdirs/cmbs4/chile_optimization/analysis/cbischoff/phase2/spectra/phase2_spec_' USE THIS LINE WHEN FINDING COLINS SPECTRA
+    filename = 'spectra/phase2_spec_' 
     filename += f'{simtype}_f{field:1d}_y{yr:1d}_n{nlat:1d}_'
     if split_bands:
         filename += 'split_'
