@@ -35,7 +35,7 @@ parser.add_argument('--dry-run', action='store_true',
 def starting_guess(field):
     if field == 1:
         guess = {'r': 0.0, 'Alens': 1.0, 
-                 'A_d': 14.2, 'alpha_d': -0.68, 'beta_d': 1.65, 'T_d': 19.6, 'EEBB_d': 2.0, #changed A_d (og 13.7) and beta_d (1.64) to match values on website also setting them constant below
+                 'A_d': 13.7, 'alpha_d': -0.68, 'beta_d': 1.64, 'T_d': 19.6, 'EEBB_d': 2.0,
                  'A_s': 1.1, 'alpha_s': -1.1, 'beta_s': -3.1, 'EEBB_s': 2.0,
                  'epsilon': 0.025, 'Delta_d': 0.999, 'gamma_d': 0.0,
                  'Delta_s': 0.999, 'gamma_s': 0.0}
@@ -102,8 +102,8 @@ if __name__ == '__main__':
     savefile += '.npy'
 
     # Run maximum likelihood searches
-    free = ['r', 'alpha_d', 'A_s', 'alpha_s', 'beta_s', 'epsilon',
-            'Delta_d', 'Delta_s'] #removed A_d and beta_d from free parameter list
+    free = ['r', 'A_d','alpha_d', 'beta_d', 'A_s', 'alpha_s', 'beta_s', 'epsilon',
+            'Delta_d', 'Delta_s'] 
     limits = {'beta_d': [1.0, 2.0], 'alpha_d': [-2.0, 0.5],
               'beta_s': [-4.0, -2.0], 'alpha_s': [-2.0, 0.5],
               'epsilon': [-1,1], 'Delta_d': [0.5,1.1], 'Delta_s': [0.5,1.1]}
