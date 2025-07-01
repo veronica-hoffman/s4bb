@@ -28,6 +28,7 @@ parser.add_argument('--noffdiag', type=int, default=1,
                     help='number of off-diagonal blocks to keep in BPCM')
 parser.add_argument('--dry-run', action='store_true',
                     help='print configuration and exit')
+parser.add_argument('--biased', action = 'store_true', help = 'Use biased spectra')
 
 # Starting guess for model parameters depends on which subfield we are looking
 # at. These guesses come Colin's phase 1 results posting.
@@ -74,9 +75,9 @@ if __name__ == '__main__':
     #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
     print('s4bb version: local files only (no git)')
 
-    # Read CMB+fg+noise spectra
+    # Read CMB+fg+noise spectra    MODIFIED TO INCLUDE BIASED ARG
     data = ph2.get_spectra('comb', args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
-                           split_bands=args.split, pbscaling=args.pbs)
+                           split_bands=args.split, pbscaling=args.pbs, biased = args.biased)
     # Get likelihood data structure
     lik = ph2.get_likelihood(args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
                              args.split, args.pbs)

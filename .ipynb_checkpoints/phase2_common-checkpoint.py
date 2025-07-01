@@ -292,10 +292,13 @@ def spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscali
     filename += f'{rlz0:03d}_{rlz1:03d}.h5'
     return filename
 
-def get_spectra(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
+def get_spectra(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False, biased=False):
     """Loads spectra from HDF5 file"""
 
-    filename = spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling) 
+    filename = spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
+    #ADDED BIASED SPECTRUM CONSIDERATION
+    if biased:
+        filename = filename.replace('.h5', '_biased.h5')
     with h5py.File(filename, 'r') as f:
         spec = XSpec.from_hdf5(f)
     # Keep BB only, ell bins 0-12

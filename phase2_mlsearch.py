@@ -24,10 +24,11 @@ parser.add_argument('--split', action='store_true',
                     help='set flag to use MF split bands')
 parser.add_argument('--pbs', action='store_true',
                     help='set flag to use performance-based scaling for SAT')
-parser.add_argument('--noffdiag', type=int, default=1,
+parser.add_argument('--noffdiag', type=int, default=0,
                     help='number of off-diagonal blocks to keep in BPCM')
 parser.add_argument('--dry-run', action='store_true',
                     help='print configuration and exit')
+parser.add_argument('--rbias', type=float, default = None, help='r bias value if using bias spectra')
 
 # Starting guess for model parameters depends on which subfield we are looking
 # at. These guesses come Colin's phase 1 results posting.
@@ -66,6 +67,8 @@ if __name__ == '__main__':
     else:
         print('no performance-based scaling')
     print(f'noffdiag = {args.noffdiag}')
+    if args.rbias is not None:
+        print(f'using biased spectra with r = {args.rbias}')
     if args.dry_run:
         quit()
     
@@ -74,9 +77,9 @@ if __name__ == '__main__':
     #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
     print('s4bb version: local files only (no git)')
 
-    # Read CMB+fg+noise spectra
+    # Read CMB+fg+noise spectra    MODIFIED TO INCLUDE BIASED ARG
     data = ph2.get_spectra('comb', args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
-                           split_bands=args.split, pbscaling=args.pbs)
+                           split_bands=args.split, pbscaling=args.pbs, rbias= args.rbias)
     # Get likelihood data structure
     lik = ph2.get_likelihood(args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
                              args.split, args.pbs)
@@ -89,8 +92,8 @@ if __name__ == '__main__':
     lik.compute_fiducial_bpcm(lik.expv(guess, include_bias=False),
                               noffdiag=args.noffdiag, mask_noise=True)
     
-    # Save results
-    savefile = f'mlsearch/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}'
+    # Save results  ADDED noffdiag file save feature
+    savefile = f'mlsearch/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
     if args.split:
         savefile += '_split'
     else:
@@ -99,6 +102,8 @@ if __name__ == '__main__':
         savefile += '_withpbs'
     else:
         savefile += '_nopbs'
+    if args.rbias is not None:
+        savefile += f'_rbias{args.rbias:.0e}'
     savefile += '.npy'
 
     # Run maximum likelihood searches
