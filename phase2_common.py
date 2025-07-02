@@ -298,7 +298,7 @@ def get_spectra(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscalin
     filename = spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     #ADDED BIASED SPECTRUM CONSIDERATION
     if rbias is not None:
-        filename = filename.replace('.h5', f'_rbias{rbias:.0e}.h5')
+        filename = filename.replace('.h5', f'_rbias{rbias:.1e}.h5')
     with h5py.File(filename, 'r') as f:
         spec = XSpec.from_hdf5(f)
     # Keep BB only, ell bins 0-12

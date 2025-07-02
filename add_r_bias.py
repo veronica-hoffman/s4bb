@@ -155,7 +155,7 @@ def add_bias_to_spectra():
         savefile += 'withpbs_'
     else:
         savefile += 'nopbs_'
-    savefile += f'{args.rlz[0]:03d}_{args.rlz[1]:03d}_rbias{args.rbias:.0e}.h5'
+    savefile += f'{args.rlz[0]:03d}_{args.rlz[1]:03d}_rbias{args.rbias:.1e}.h5'
     
     with h5py.File(savefile, 'w') as f:
         spec.to_hdf5(f)

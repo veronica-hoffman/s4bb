@@ -103,7 +103,7 @@ if __name__ == '__main__':
     else:
         savefile += '_nopbs'
     if args.rbias is not None:
-        savefile += f'_rbias{args.rbias:.0e}'
+        savefile += f'_rbias{args.rbias:.1e}'
     savefile += '.npy'
 
     # Run maximum likelihood searches
