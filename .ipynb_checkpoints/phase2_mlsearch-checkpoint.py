@@ -93,7 +93,7 @@ if __name__ == '__main__':
                               noffdiag=args.noffdiag, mask_noise=True)
     
     # Save results  ADDED noffdiag file save feature
-    savefile = f'mlsearch/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
+    savefile = f'mlsearch_bandpass/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
     if args.split:
         savefile += '_split'
     else:
