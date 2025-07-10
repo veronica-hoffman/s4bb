@@ -49,7 +49,7 @@ bands = {'LF-1': {'freq': 26,
 		   'fwhm_arcmin': 20.6, 'lensing_template': False,
                    'cov': '/global/cfs/cdirs/cmbs4/chile_optimization/simulations/phase2/noise_depth/sun90max_f095_90years_cov.fits'},
          'MF-1': {'freq': 90,
-                  'bandpass': Bandpass.tophat(77.0, 106.0),
+                  'bandpass': Bandpass.tophat(77.0 , 106.0),
                   'fwhm_arcmin': 21.4, 'lensing_template': False,
                   'cov': '/global/cfs/cdirs/cmbs4/chile_optimization/simulations/phase2/noise_depth/sun90max_f090_180years_cov.fits'},
 	 'MF1-2': {'freq': 145,
@@ -69,7 +69,7 @@ bands = {'LF-1': {'freq': 26,
 		  'fwhm_arcmin': 9.4, 'lensing_template': False,
                   'cov': '/global/cfs/cdirs/cmbs4/chile_optimization/simulations/phase2/noise_depth/sun90max_f220_60years_cov.fits'},
 	 'HF-2': {'freq': 286,
-		  'bandpass': Bandpass.tophat(256.0 * 1.05, 315.0 * 1.05), #MODIFYING THESE BANDS TO SEE WHAT HAPPENS (
+		  'bandpass': Bandpass.tophat(256.0, 315.0), #MODIFYING THESE BANDS TO SEE WHAT HAPPENS (
 		  'fwhm_arcmin': 7.8, 'lensing_template': False,
                   'cov': '/global/cfs/cdirs/cmbs4/chile_optimization/simulations/phase2/noise_depth/sun90max_f280_60years_cov.fits'},
 	 'LT': {'freq': None, 'bandpass': None, 'fwhm_arcmin': None,
@@ -79,6 +79,39 @@ bands = {'LF-1': {'freq': 26,
 # Bands to use for "with split bands" vs "no split bands" cases.
 with_split_bands = ['LF-1', 'LF-2', 'MF1-1', 'MF2-1', 'MF1-2', 'MF2-2', 'HF-1', 'HF-2', 'LT']
 no_split_bands = ['LF-1', 'LF-2', 'MF-1', 'MF-2', 'HF-1', 'HF-2', 'LT']
+
+#ADDED FOR BIASING BANDS
+def apply_band_bias(bands_dict, bias_band = None, bias_percent = 0.0):
+    if bias_band is None or bias_percent == 0.0:
+        return bands_dict
+    
+    biased_bands = bands_dict.copy()    
+    bias_factor = 1.0 + (bias_percent / 100.0)
+    band_info = biased_bands[bias_band]
+    
+    original_bandpasses = {
+        'LF-1': (21.5, 28.0),
+        'LF-2': (28.0, 45.0),
+        'MF1-1': (74.8, 95.2),
+        'MF2-1': (83.6, 106.4),
+        'MF-1': (77.0, 106.0),
+        'MF1-2': (129.1, 161.0),
+        'MF2-2': (138.0, 172.1),
+        'MF-2': (128.0, 169.0),
+        'HF-1': (198.0, 256.0),
+        'HF-2': (256.0, 315.0)
+    }
+    
+    nu_min, nu_max = original_bandpasses[bias_band]
+    new_nu_min = nu_min * bias_factor
+    new_nu_max = nu_max * bias_factor
+    biased_bands[bias_band]['bandpass'] = Bandpass.tophat(new_nu_min, new_nu_max)
+        
+    print(f"Applied {bias_percent:+.1f}% bias to {bias_band}:")
+    print(f"  Original: ({nu_min:.1f}, {nu_max:.1f}) GHz")
+    print(f"  Biased:   ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")    
+    return biased_bands
+
 
 # Ell bins: delta-ell=20, starting from ell=30
 bin_low = np.arange(30, 500, 20)
@@ -277,9 +310,8 @@ def trim_maps(apod, maps, threshold=1e-6):
 
 def spectra_file(simtype, field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
     """Returns HDF5 file name for spectra"""
-
     #filename = '/global/cfs/cdirs/cmbs4/chile_optimization/analysis/cbischoff/phase2/spectra/phase2_spec_' USE THIS LINE WHEN FINDING COLINS SPECTRA
-    filename = 'spectra_bandpass/phase2_spec_' 
+    filename = 'spectra/phase2_spec_'
     filename += f'{simtype}_f{field:1d}_y{yr:1d}_n{nlat:1d}_'
     if split_bands:
         filename += 'split_'
@@ -417,7 +449,6 @@ def get_bias(field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
 
 def get_likelihood(field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
     """Get likelihood object"""
-
     bias = get_bias(field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     bpcm = get_bpcm(field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     wf = get_bpwf(field, split_bands=split_bands)

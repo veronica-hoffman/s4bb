@@ -29,6 +29,10 @@ parser.add_argument('--noffdiag', type=int, default=0,
 parser.add_argument('--dry-run', action='store_true',
                     help='print configuration and exit')
 parser.add_argument('--rbias', type=float, default = None, help='r bias value if using bias spectra')
+parser.add_argument('--bias-band', default=None, #ADDING band bias arguments
+                    help='band to apply bias to (e.g., HF-2)')
+parser.add_argument('--bias-percent', type=float, default=0.0,
+                    help='percentage bias to apply (e.g., 2.0 for +2%)')
 
 # Starting guess for model parameters depends on which subfield we are looking
 # at. These guesses come Colin's phase 1 results posting.
@@ -69,6 +73,8 @@ if __name__ == '__main__':
     print(f'noffdiag = {args.noffdiag}')
     if args.rbias is not None:
         print(f'using biased spectra with r = {args.rbias}')
+    if args.bias_band is not None:
+        print(f'using biased bands with {args.bias_percent}% bias to {args.bias_band}')
     if args.dry_run:
         quit()
     
@@ -77,12 +83,19 @@ if __name__ == '__main__':
     #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
     print('s4bb version: local files only (no git)')
 
-    # Read CMB+fg+noise spectra    MODIFIED TO INCLUDE BIASED ARG
+    
+    # Read CMB+fg+noise spectra    
     data = ph2.get_spectra('comb', args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
-                           split_bands=args.split, pbscaling=args.pbs, rbias= args.rbias)
+                       split_bands=args.split, pbscaling=args.pbs, rbias= args.rbias)
+
+    if args.bias_band is not None or args.bias_percent != 0.0: #for modified bands
+        biased_bands = ph2.apply_band_bias(ph2.bands, args.bias_band, args.bias_percent)
+        original_bands = ph2.bands
+        ph2.bands = biased_bands
+        
     # Get likelihood data structure
     lik = ph2.get_likelihood(args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
-                             args.split, args.pbs)
+                         args.split, args.pbs)
 
     # H-L precalculations
     # It seems to make a big difference to set noffdiag=1 for the
@@ -92,8 +105,8 @@ if __name__ == '__main__':
     lik.compute_fiducial_bpcm(lik.expv(guess, include_bias=False),
                               noffdiag=args.noffdiag, mask_noise=True)
     
-    # Save results  ADDED noffdiag file save feature
-    savefile = f'mlsearch_bandpass/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
+    # Save results  ADDED noffdiag, band bias filesave features
+    savefile = f'mlsearch_bandpass_v2/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
     if args.split:
         savefile += '_split'
     else:
@@ -104,6 +117,8 @@ if __name__ == '__main__':
         savefile += '_nopbs'
     if args.rbias is not None:
         savefile += f'_rbias{args.rbias:.1e}'
+    if args.bias_band is not None or args.bias_percent != 0.0:
+        savefile += f'_{args.bias_band}_{args.bias_percent:+g}pct'
     savefile += '.npy'
 
     # Run maximum likelihood searches
@@ -133,3 +148,6 @@ if __name__ == '__main__':
         x[11,i] = result['Delta_s']
     # Done, save results.
     np.save(savefile, x)
+
+    if args.bias_band is not None or args.bias_percent != 0.0: #put bands bak to normal
+        ph2.bands = original_bands

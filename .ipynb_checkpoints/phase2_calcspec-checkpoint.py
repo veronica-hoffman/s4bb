@@ -58,7 +58,7 @@ if __name__ == '__main__':
     #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
     print('s4bb version: local files only (no git)')
     print('namaster version: {}'.format(nmt.__version__))
-    
+
     # Input maps to power spectrum estimator
     maplist = ph2.get_maplist(args.simtype, split_bands=args.split)
     for m in maplist:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     # Save spectra to HDF5 file
     outfile = ph2.spectra_file(args.simtype, args.field, args.year, args.nlat,
-                               args.rlz[0], args.rlz[1], split_bands=args.split,
-                               pbscaling=args.pbs)
+                           args.rlz[0], args.rlz[1], split_bands=args.split,
+                           pbscaling=args.pbs)
     with h5py.File(outfile, 'w') as f:
         spec.to_hdf5(f)
