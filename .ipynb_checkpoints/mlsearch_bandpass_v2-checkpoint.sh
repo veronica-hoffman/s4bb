@@ -5,6 +5,8 @@
 #SBATCH -N 1
 #SBATCH -c 10
 #SBATCH -q regular
+#SBATCH --mail-user=vhoffman@lbl.gov
+#SBATCH --mail-type=ALL
 
 # Run maximum likelihood search for bandpass miscalibration test
 # 6 bands (HF-2, HF-1, MF-1, MF-2, LF-1, LF-2) × 2 bias directions (+/-2%) = 12 tasks
@@ -26,12 +28,12 @@ bands=("HF-2" "HF-1" "MF-1" "MF-2" "LF-1" "LF-2")
 # Run bandpass miscalibration tests
 for band in "${bands[@]}"; do
     # +2% bias
-    /usr/bin/time -v python -u phase2_mlsearch.py 1 20 --pbs --bias-band="${band}" --bias-percent=2.0 --noffdiag=0 \
-        &> jobs/ph2_mlsearch_f1_y20_${band}_plus2pct.out &
+    /usr/bin/time -v python -u phase2_mlsearch.py 2 20 --pbs --bias-band="${band}" --bias-percent=2.0 --noffdiag=0 \
+        &> jobs/ph2_mlsearch_f2_y20_n3_diag0_full_nopbs_${band}_+2pct.out &
     
     # -2% bias  
-    /usr/bin/time -v python -u phase2_mlsearch.py 1 20 --pbs --bias-band="${band}" --bias-percent=-2.0 --noffdiag=0 \
-        &> jobs/ph2_mlsearch_f1_y20_${band}_minus2pct.out &
+    /usr/bin/time -v python -u phase2_mlsearch.py 2 20 --pbs --bias-band="${band}" --bias-percent=-2.0 --noffdiag=0 \
+        &> jobs/ph2_mlsearch_f2_y20_n3_diag0_full_nopbs_${band}_-2pct.out &
 done
 
 wait
