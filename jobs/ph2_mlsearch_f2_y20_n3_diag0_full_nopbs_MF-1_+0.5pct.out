@@ -1,0 +1,33 @@
+field = 1
+year = 20
+nlat = 3
+using full bands
+using performance-based scaling
+noffdiag = 0
+using biased bands with 0.5% bias to MF-1
+s4bb version: local files only (no git)
+Applied +0.5% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (77.4, 106.5) GHz
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+/global/u1/v/vhoffman/reproduce_colin_results/s4bb/models.py:629: RuntimeWarning: invalid value encountered in sqrt
+  np.sqrt(param[0] * param[5] * dust_ell_scale *
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19

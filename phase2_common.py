@@ -112,6 +112,68 @@ def apply_band_bias(bands_dict, bias_band = None, bias_percent = 0.0):
     print(f"  Biased:   ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")    
     return biased_bands
 
+def apply_uniform_bias(bands_dict, bias_percent = 0.0):
+    if bias_percent == 0.0:
+        return bands_dict
+    
+    biased_bands = bands_dict.copy()
+    bias_factor = 1.0 + (bias_percent / 100.0)
+    
+    original_bandpasses = {
+        'LF-1': (21.5, 28.0),
+        'LF-2': (28.0, 45.0),
+        'MF1-1': (74.8, 95.2),
+        'MF2-1': (83.6, 106.4),
+        'MF-1': (77.0, 106.0),
+        'MF1-2': (129.1, 161.0),
+        'MF2-2': (138.0, 172.1),
+        'MF-2': (128.0, 169.0),
+        'HF-1': (198.0, 256.0),
+        'HF-2': (256.0, 315.0)
+    }
+    print(f"Applied {bias_percent:+.1f}% uniform bias to all bands:")
+    for band_name in original_bandpasses.keys():
+        nu_min, nu_max = original_bandpasses[band_name]
+        new_nu_min = nu_min * bias_factor
+        new_nu_max = nu_max * bias_factor
+        biased_bands[band_name]['bandpass'] = Bandpass.tophat(new_nu_min, new_nu_max)
+        print(f"  {band_name}: ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
+    return biased_bands
+
+def apply_random_bias(bands_dict, bias_std = 0.0, seed = None):
+    if bias_std == 0.0:
+        return bands_dict, np.array([])
+    if seed is not None:
+        np.random.seed(seed)
+        
+    biased_bands = bands_dict.copy()
+    
+    original_bandpasses = {
+        'LF-1': (21.5, 28.0),
+        'LF-2': (28.0, 45.0),
+        'MF1-1': (74.8, 95.2),
+        'MF2-1': (83.6, 106.4),
+        'MF-1': (77.0, 106.0),
+        'MF1-2': (129.1, 161.0),
+        'MF2-2': (138.0, 172.1),
+        'MF-2': (128.0, 169.0),
+        'HF-1': (198.0, 256.0),
+        'HF-2': (256.0, 315.0)
+    }
+
+    band_names = [name for name in original_bandpasses.keys()]
+    band_biases = np.random.normal(0, bias_std, size = len(band_names))
+    print(f"Applied random Gaussian bias (std={bias_std:.1f}%) to all bands:")
+    for i, band_name in enumerate(band_names):
+        bias_percent = band_biases[i]
+        bias_factor = 1.0 + (bias_percent / 100.0)
+        nu_min, nu_max = original_bandpasses[band_name]
+        new_nu_min = nu_min * bias_factor
+        new_nu_max = nu_max * bias_factor
+        biased_bands[band_name]['bandpass'] = Bandpass.tophat(new_nu_min, new_nu_max)
+        print(f"  {band_name}: {bias_percent:+.2f}% -> ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
+    
+    return biased_bands, band_biases
 
 # Ell bins: delta-ell=20, starting from ell=30
 bin_low = np.arange(30, 500, 20)
