@@ -28,11 +28,17 @@ parser.add_argument('--noffdiag', type=int, default=0,
                     help='number of off-diagonal blocks to keep in BPCM')
 parser.add_argument('--dry-run', action='store_true',
                     help='print configuration and exit')
-parser.add_argument('--rbias', type=float, default = None, help='r bias value if using bias spectra')
-parser.add_argument('--bias-band', default=None, #ADDING band bias arguments
-                    help='band to apply bias to (e.g., HF-2)')
-parser.add_argument('--bias-percent', type=float, default=0.0,
-                    help='percentage bias to apply (e.g., 2.0 for +2%)')
+parser.add_argument('--rbias', type=float, default = None, 
+                    help='r bias value if using bias spectra')
+parser.add_argument('--bias-band', default=None, #ADDING DIFFERENT WAYS TO INCLUDE BIAS- YOU CANNOT USE MULTIPLE BIAS OPTIONS AT ONCE! You should set the bias-percent arg to what you want as well
+                    help='apply bias to only one band(e.g., HF-2)')
+parser.add_argument('--uniform-bias', action='store_true',
+                    help='apply same bias to all bands') 
+parser.add_argument('--random-bias', action='store_true',
+                    help='apply random Gaussian bias to all bands')
+parser.add_argument('--bias-percent', type=float, default=0.5,
+                    help='percentage bias to apply (e.g., 2.0 for +2%)- if using random bias, its the std %')
+
 
 # Starting guess for model parameters depends on which subfield we are looking
 # at. These guesses come Colin's phase 1 results posting.
@@ -74,7 +80,11 @@ if __name__ == '__main__':
     if args.rbias is not None:
         print(f'using biased spectra with r = {args.rbias}')
     if args.bias_band is not None:
-        print(f'using biased bands with {args.bias_percent}% bias to {args.bias_band}')
+        print(f'using single band bias: {args.bias_percent}% bias to {args.bias_band}')
+    if args.random_bias:
+        print(f'using random Gaussian bias on all bands: std = {args.bias_percent}%')
+    if args.uniform_bias:
+        print(f'using uniform bias on all bands: {args.bias_percent}%')
     if args.dry_run:
         quit()
     
@@ -83,27 +93,37 @@ if __name__ == '__main__':
     #print('s4bb version: {}'.format(s4bbrepo.head.object.hexsha))
     print('s4bb version: local files only (no git)')
 
+    original_bands = ph2.bands.copy()
+
+    if args.bias_band is not None:
+        ph2.bands = ph2.apply_band_bias(ph2.bands, args.bias_band, args.bias_percent)
+        bias_type = 'single'
+    elif args.uniform_bias:
+        ph2.bands = ph2.apply_uniform_bias(ph2.bands, args.bias_percent)
+        bias_type = 'uniform'
+    elif args.random_bias:
+        #for random, we need to do a more complicated implementation
+        num_bands = len(original_bands)
+        bias_type = 'random'
+    else:
+        bias_type = 'none'
     
     # Read CMB+fg+noise spectra    
     data = ph2.get_spectra('comb', args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
                        split_bands=args.split, pbscaling=args.pbs, rbias= args.rbias)
-
-    if args.bias_band is not None or args.bias_percent != 0.0: #for modified bands
-        biased_bands = ph2.apply_band_bias(ph2.bands, args.bias_band, args.bias_percent)
-        original_bands = ph2.bands
-        ph2.bands = biased_bands
-        
-    # Get likelihood data structure
-    lik = ph2.get_likelihood(args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
+    
+    if bias_type != 'random':  #separate random bias cases from the rest- its a bit more complicated
+        # Get likelihood data structure
+        lik = ph2.get_likelihood(args.field, args.year, args.nlat, args.rlz[0], args.rlz[1],
                          args.split, args.pbs)
 
-    # H-L precalculations
-    # It seems to make a big difference to set noffdiag=1 for the
-    # bandpower covariance matrix. Keeping two off-diagonal blocks
-    # led to lots of failed mlsearch results.
-    guess = starting_guess(args.field)
-    lik.compute_fiducial_bpcm(lik.expv(guess, include_bias=False),
-                              noffdiag=args.noffdiag, mask_noise=True)
+        # H-L precalculations
+        # It seems to make a big difference to set noffdiag=1 for the
+        # bandpower covariance matrix. Keeping two off-diagonal blocks
+        # led to lots of failed mlsearch results.
+        guess = starting_guess(args.field)
+        lik.compute_fiducial_bpcm(lik.expv(guess, include_bias=False),
+                                  noffdiag=args.noffdiag, mask_noise=True)
     
     # Save results  ADDED noffdiag, band bias filesave features
     savefile = f'mlsearch_bandpass_v2/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
@@ -117,8 +137,12 @@ if __name__ == '__main__':
         savefile += '_nopbs'
     if args.rbias is not None:
         savefile += f'_rbias{args.rbias:.1e}'
-    if args.bias_band is not None or args.bias_percent != 0.0:
+    if args.bias_band is not None:
         savefile += f'_{args.bias_band}_{args.bias_percent:+g}pct'
+    if args.uniform_bias:
+        savefile += f'_uniform_{args.bias_percent:+g}pct'
+    if args.random_bias:
+         savefile += f'_random_{args.bias_percent:+g}pct'
     savefile += '.npy'
 
     # Run maximum likelihood searches
@@ -130,9 +154,34 @@ if __name__ == '__main__':
     method = 'L-BFGS-B'
     options = {'maxls': 30}
     x = np.zeros(shape=(12,data.shape[2]))
+
+    if bias_type == 'random':
+        bias_values = None
+    
     for i in range(data.shape[2]):
         print(i)
-        (result, fval, status) = lik.mlsearch(data[:,:,i], guess, free=free, limits=limits,
+
+        if bias_type == 'random': #added handling for the random bias
+            
+            # Apply random bias for this specific realization
+            ph2.bands, current_biases = ph2.apply_random_bias(original_bands, args.bias_percent, 
+                                             seed=i + args.rlz[0])
+
+            #store bias values
+            if bias_values is None:
+                bias_values = np.zeros((len(current_biases), data.shape[2]))
+            bias_values[:, i] = current_biases
+        
+            # Get likelihood with this realization's random bias
+            lik_current = ph2.get_likelihood(args.field, args.year, args.nlat, 
+                                            args.rlz[0], args.rlz[1], args.split, args.pbs)
+            guess = starting_guess(args.field)
+            lik_current.compute_fiducial_bpcm(lik_current.expv(guess, include_bias=False),
+                                             noffdiag=args.noffdiag, mask_noise=True)
+        else:
+            lik_current = lik
+        
+        (result, fval, status) = lik_current.mlsearch(data[:,:,i], guess, free=free, limits=limits,
                                               method=method, options=options)
         x[0,i] = status
         x[1,i] = fval
@@ -148,6 +197,8 @@ if __name__ == '__main__':
         x[11,i] = result['Delta_s']
     # Done, save results.
     np.save(savefile, x)
+    if bias_type == 'random':
+        bias_savefile = savefile.replace('.npy', '_biases.npy')
+        np.save(bias_savefile, bias_values)
 
-    if args.bias_band is not None or args.bias_percent != 0.0: #put bands bak to normal
-        ph2.bands = original_bands
+    ph2.bands = original_bands #put bands back to normal if they were modified
