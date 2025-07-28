@@ -1,0 +1,98 @@
+field = 1
+year = 20
+band = LF-2
+nlat = 3
+r bias tolerance = 0.0001
+max bias search = 5.0%
+using 10 realizations for testing
+loading unbiased results from: mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy
+using full bands
+using performance-based scaling
+
+Loading existing unbiased ML search results...
+Loaded 100 realizations from mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy
+Using 10 realizations for tolerance search
+Realization indices: [0 1 2 3 4 5 6 7 8 9]
+
+Reading data...
+
+Finding bias tolerance for LF-2...
+Baseline r mean from existing data: 0.000264
+Searching for positive bias tolerance...
+Applied +2.5% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (28.7, 46.1) GHz
+  Testing 2.5%: r_bias = 0.000038
+Applied +3.8% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (29.1, 46.7) GHz
+/global/u1/v/vhoffman/reproduce_colin_results/s4bb/models.py:629: RuntimeWarning: invalid value encountered in sqrt
+  np.sqrt(param[0] * param[5] * dust_ell_scale *
+  Testing 3.8%: r_bias = 0.000240
+Applied +3.1% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (28.9, 46.4) GHz
+  Testing 3.1%: r_bias = 0.000130
+Applied +2.8% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (28.8, 46.3) GHz
+  Testing 2.8%: r_bias = 0.000080
+Applied +3.0% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (28.8, 46.3) GHz
+  Testing 3.0%: r_bias = 0.000110
+Applied +2.9% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (28.8, 46.3) GHz
+  Testing 2.9%: r_bias = 0.000090
+Searching for negative bias tolerance...
+Applied -2.5% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.3, 43.9) GHz
+  Testing -2.5%: r_bias = 0.000469
+Applied -1.2% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.7, 44.4) GHz
+  Testing -1.2%: r_bias = 0.000135
+Applied -0.6% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.8, 44.7) GHz
+  Testing -0.6%: r_bias = 0.000026
+Applied -0.9% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.7, 44.6) GHz
+  Testing -0.9%: r_bias = 0.000067
+Applied -1.1% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.7, 44.5) GHz
+  Testing -1.1%: r_bias = 0.000094
+Applied -1.2% bias to LF-2:
+  Original: (28.0, 45.0) GHz
+  Biased:   (27.7, 44.5) GHz
+  Testing -1.2%: r_bias = 0.000113
+
+Final result for LF-2: [-1.09%, +2.89%]
+Results saved to bandpass_tolerance/ph2_tolerance_f1_y20_n3_diag0_full_withpbs_LF-2_rtol1e-04_nrlz10.npy
+	Command being timed: "python -u bandpass_tolerance.py 1 20 LF-2 --unbiased-file mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy --pbs --r-bias-tol 0.0001 --n-realizations 10"
+	User time (seconds): 35422.24
+	System time (seconds): 9.97
+	Percent of CPU this job got: 438%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:14:37
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1532004
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 597
+	Minor (reclaiming a frame) page faults: 4027486
+	Voluntary context switches: 337500
+	Involuntary context switches: 91213
+	Swaps: 0
+	File system inputs: 22
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

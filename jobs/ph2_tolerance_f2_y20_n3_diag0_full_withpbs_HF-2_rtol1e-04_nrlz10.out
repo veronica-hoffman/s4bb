@@ -1,0 +1,98 @@
+field = 2
+year = 20
+band = HF-2
+nlat = 3
+r bias tolerance = 0.0001
+max bias search = 5.0%
+using 10 realizations for testing
+loading unbiased results from: mlsearch/ph2_mlsearch_f2_y20_n3_diag0_full_withpbs.npy
+using full bands
+using performance-based scaling
+
+Loading existing unbiased ML search results...
+Loaded 99 realizations from mlsearch/ph2_mlsearch_f2_y20_n3_diag0_full_withpbs.npy
+Using 10 realizations for tolerance search
+Realization indices: [0 1 2 3 4 5 6 7 8 9]
+
+Reading data...
+
+Finding bias tolerance for HF-2...
+Baseline r mean from existing data: 0.001714
+Searching for positive bias tolerance...
+Applied +2.5% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (262.4, 322.9) GHz
+/global/u1/v/vhoffman/reproduce_colin_results/phase2_common.py:193: RuntimeWarning: invalid value encountered in arccos
+  ang = np.arccos(x * x0 + y * y0 + z * z0)
+  Testing 2.5%: r_bias = 0.006057
+Applied +1.2% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (259.2, 318.9) GHz
+  Testing 1.2%: r_bias = 0.000451
+Applied +0.6% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (257.6, 317.0) GHz
+  Testing 0.6%: r_bias = -0.000300
+Applied +0.3% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (256.8, 316.0) GHz
+  Testing 0.3%: r_bias = -0.000246
+Applied +0.2% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (256.4, 315.5) GHz
+  Testing 0.2%: r_bias = -0.000162
+Applied +0.1% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (256.2, 315.2) GHz
+  Testing 0.1%: r_bias = -0.000088
+Searching for negative bias tolerance...
+Applied -2.5% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (249.6, 307.1) GHz
+  Testing -2.5%: r_bias = 0.010080
+Applied -1.2% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (252.8, 311.1) GHz
+  Testing -1.2%: r_bias = 0.003190
+Applied -0.6% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (254.4, 313.0) GHz
+  Testing -0.6%: r_bias = 0.001169
+Applied -0.3% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (255.2, 314.0) GHz
+  Testing -0.3%: r_bias = 0.000479
+Applied -0.2% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (255.6, 314.5) GHz
+  Testing -0.2%: r_bias = 0.000319
+Applied -0.1% bias to HF-2:
+  Original: (256.0, 315.0) GHz
+  Biased:   (255.8, 314.8) GHz
+  Testing -0.1%: r_bias = 0.000117
+
+Final result for HF-2: [0.00%, +0.08%]
+Results saved to bandpass_tolerance/ph2_tolerance_f2_y20_n3_diag0_full_withpbs_HF-2_rtol1e-04_nrlz10.npy
+	Command being timed: "python -u bandpass_tolerance.py 2 20 HF-2 --unbiased-file mlsearch/ph2_mlsearch_f2_y20_n3_diag0_full_withpbs.npy --pbs --r-bias-tol 0.0001 --n-realizations 10"
+	User time (seconds): 24267.44
+	System time (seconds): 10.44
+	Percent of CPU this job got: 416%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:37:07
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1408012
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 404
+	Minor (reclaiming a frame) page faults: 4352426
+	Voluntary context switches: 255600
+	Involuntary context switches: 57910
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

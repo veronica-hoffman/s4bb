@@ -165,7 +165,7 @@ if __name__ == '__main__':
             
             # Apply random bias for this specific realization
             ph2.bands, current_biases = ph2.apply_random_bias(original_bands, args.bias_percent, 
-                                             seed=i + args.rlz[0])
+                                             seed= None)
 
             #store bias values
             if bias_values is None:

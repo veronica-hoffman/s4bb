@@ -1,0 +1,98 @@
+field = 1
+year = 20
+band = MF-1
+nlat = 3
+r bias tolerance = 0.0001
+max bias search = 5.0%
+using 10 realizations for testing
+loading unbiased results from: mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy
+using full bands
+using performance-based scaling
+
+Loading existing unbiased ML search results...
+Loaded 100 realizations from mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy
+Using 10 realizations for tolerance search
+Realization indices: [0 1 2 3 4 5 6 7 8 9]
+
+Reading data...
+
+Finding bias tolerance for MF-1...
+Baseline r mean from existing data: 0.000264
+Searching for positive bias tolerance...
+Applied +2.5% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.9, 108.6) GHz
+  Testing 2.5%: r_bias = 0.000172
+Applied +1.2% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.0, 107.3) GHz
+  Testing 1.2%: r_bias = -0.000003
+Applied +1.9% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.4, 108.0) GHz
+  Testing 1.9%: r_bias = 0.000063
+Applied +2.2% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.7, 108.3) GHz
+  Testing 2.2%: r_bias = 0.000112
+Applied +2.0% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.6, 108.2) GHz
+/global/u1/v/vhoffman/reproduce_colin_results/s4bb/models.py:629: RuntimeWarning: invalid value encountered in sqrt
+  np.sqrt(param[0] * param[5] * dust_ell_scale *
+  Testing 2.0%: r_bias = 0.000086
+Applied +2.1% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (78.6, 108.2) GHz
+  Testing 2.1%: r_bias = 0.000105
+Searching for negative bias tolerance...
+Applied -2.5% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (75.1, 103.3) GHz
+  Testing -2.5%: r_bias = 0.000295
+Applied -1.2% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (76.0, 104.7) GHz
+  Testing -1.2%: r_bias = 0.000050
+Applied -1.9% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (75.6, 104.0) GHz
+  Testing -1.9%: r_bias = 0.000165
+Applied -1.6% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (75.8, 104.3) GHz
+  Testing -1.6%: r_bias = 0.000111
+Applied -1.4% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (75.9, 104.5) GHz
+  Testing -1.4%: r_bias = 0.000089
+Applied -1.5% bias to MF-1:
+  Original: (77.0, 106.0) GHz
+  Biased:   (75.9, 104.4) GHz
+  Testing -1.5%: r_bias = 0.000102
+
+Final result for MF-1: [-1.41%, +2.03%]
+Results saved to bandpass_tolerance/ph2_tolerance_f1_y20_n3_diag0_full_withpbs_MF-1_rtol1e-04_nrlz10.npy
+	Command being timed: "python -u bandpass_tolerance.py 1 20 MF-1 --unbiased-file mlsearch/ph2_mlsearch_f1_y20_n3_full_withpbs_diag0_V.npy --pbs --r-bias-tol 0.0001 --n-realizations 10"
+	User time (seconds): 40453.55
+	System time (seconds): 10.95
+	Percent of CPU this job got: 453%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:28:49
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1416804
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 544
+	Minor (reclaiming a frame) page faults: 4736570
+	Voluntary context switches: 374945
+	Involuntary context switches: 74752
+	Swaps: 0
+	File system inputs: 30
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
