@@ -38,6 +38,8 @@ parser.add_argument('--random-bias', action='store_true',
                     help='apply random Gaussian bias to all bands')
 parser.add_argument('--bias-percent', type=float, default=0.5,
                     help='percentage bias to apply (e.g., 2.0 for +2%)- if using random bias, its the std %')
+parser.add_argument('--uniform-ghz-bias', type=float, default=0.0,
+                    help='apply uniform GHz bias to all bands (e.g., 2.0 for +2 GHz)')
 
 
 # Starting guess for model parameters depends on which subfield we are looking
@@ -85,6 +87,8 @@ if __name__ == '__main__':
         print(f'using random Gaussian bias on all bands: std = {args.bias_percent}%')
     if args.uniform_bias:
         print(f'using uniform bias on all bands: {args.bias_percent}%')
+    if args.uniform_ghz_bias != 0.0:
+        print(f'using uniform GHz bias on all bands: {args.uniform_ghz_bias:+.1f} GHz')
     if args.dry_run:
         quit()
     
@@ -105,6 +109,9 @@ if __name__ == '__main__':
         #for random, we need to do a more complicated implementation
         num_bands = len(original_bands)
         bias_type = 'random'
+    elif args.uniform_ghz_bias != 0.0:
+        ph2.bands = ph2.apply_uniform_ghz_bias(ph2.bands, args.uniform_ghz_bias)
+        bias_type = 'uniform_ghz'
     else:
         bias_type = 'none'
     
@@ -126,7 +133,7 @@ if __name__ == '__main__':
                                   noffdiag=args.noffdiag, mask_noise=True)
     
     # Save results  ADDED noffdiag, band bias filesave features
-    savefile = f'mlsearch_bandpass_v2/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
+    savefile = f'mlsearch_bandpass_ghz/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
     if args.split:
         savefile += '_split'
     else:
@@ -138,11 +145,13 @@ if __name__ == '__main__':
     if args.rbias is not None:
         savefile += f'_rbias{args.rbias:.1e}'
     if args.bias_band is not None:
-        savefile += f'_{args.bias_band}_{args.bias_percent:+g}pct'
+        savefile += f'_{args.bias_band}_{args.bias_percent:+.1f}pct'
     if args.uniform_bias:
-        savefile += f'_uniform_{args.bias_percent:+g}pct'
+        savefile += f'_uniform_{args.bias_percent:+.1f}pct'
     if args.random_bias:
-         savefile += f'_random_{args.bias_percent:+g}pct'
+         savefile += f'_random_{args.bias_percent:+.1f}pct'
+    if args.uniform_ghz_bias != 0.0:
+        savefile += f'_uniform_{args.uniform_ghz_bias:+.1f}GHz'
     savefile += '.npy'
 
     # Run maximum likelihood searches

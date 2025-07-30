@@ -175,6 +175,33 @@ def apply_random_bias(bands_dict, bias_std = 0.0, seed = None):
     
     return biased_bands, band_biases
 
+def apply_uniform_ghz_bias(bands_dict, ghz_bias = 0.0):
+    if ghz_bias == 0.0:
+        return bands_dict
+    
+    biased_bands = bands_dict.copy()
+    
+    original_bandpasses = {
+        'LF-1': (21.5, 28.0),
+        'LF-2': (28.0, 45.0),
+        'MF1-1': (74.8, 95.2),
+        'MF2-1': (83.6, 106.4),
+        'MF-1': (77.0, 106.0),
+        'MF1-2': (129.1, 161.0),
+        'MF2-2': (138.0, 172.1),
+        'MF-2': (128.0, 169.0),
+        'HF-1': (198.0, 256.0),
+        'HF-2': (256.0, 315.0)
+    }
+    print(f"Applied {ghz_bias:+.1f} GHz uniform bias to all bands:")
+    for band_name in original_bandpasses.keys():
+        nu_min, nu_max = original_bandpasses[band_name]
+        new_nu_min = nu_min + ghz_bias
+        new_nu_max = nu_max + ghz_bias
+        biased_bands[band_name]['bandpass'] = Bandpass.tophat(new_nu_min, new_nu_max)
+        print(f"  {band_name}: ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
+    return biased_bands
+
 # Ell bins: delta-ell=20, starting from ell=30
 bin_low = np.arange(30, 500, 20)
 bin_high = bin_low + 20
