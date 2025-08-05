@@ -7,7 +7,7 @@ Cross-spectrum theory models
 
 import numpy as np
 from .util import specgen
-from .bandpass import GHz, h, k, delta_Tcmb_to_delta_I
+from .bandpass import GHz, h, k, delta_Tcmb_to_delta_I, Bandpass
 
 class Model():
     """
@@ -391,13 +391,14 @@ class Model_fg(Model):
 
     """
 
-    # 14 parameter model:
+    # NOW 15 parameter model:
     #   Dust parameters: A_d, alpha_d, beta_d, T_d, EEBB_d
     #   Sync parameters: A_s, alpha_s, beta_s, EEBB_s
     #   Dust-sync correlation parameter: epsilon
     #   Dust decorrelation parameters: Delta_d, gamma_d
     #   Sync decorrelation parameters: Delta_s, gamma_s
-    nparameters = 14
+    #   NEW: FREQUENCY SHIFT
+    nparameters = 15
 
     def __init__(self, maplist, wf, ell_pivot=80.0,
                  dust_pivot=[353.0, 217.0], sync_pivot=[23.0, 33.0]):
@@ -420,12 +421,12 @@ class Model_fg(Model):
         self.dust_pivot = dust_pivot
         self.sync_pivot = sync_pivot
 
-    def param_names(self):
+    def param_names(self): #MODIFIED TO HAVE NEW PARAMETER
         """Get list of parameter names"""
         
         return ['A_d', 'alpha_d', 'beta_d', 'T_d', 'EEBB_d',
                 'A_s', 'alpha_s', 'beta_s', 'EEBB_s',
-                'epsilon', 'Delta_d', 'gamma_d', 'Delta_s', 'gamma_s']
+                'epsilon', 'Delta_d', 'gamma_d', 'Delta_s', 'gamma_s', 'freq_shift']
 
     def param_list_to_dict(self, param_list):
         """
@@ -449,7 +450,8 @@ class Model_fg(Model):
                       'alpha_s': param_list[6], 'beta_s': param_list[7],
                       'EEBB_s': param_list[8], 'epsilon': param_list[9],
                       'Delta_d': param_list[10], 'gamma_d': param_list[11],
-                      'Delta_s': param_list[12], 'gamma_s': param_list[13]}
+                      'Delta_s': param_list[12], 'gamma_s': param_list[13],
+                      'freq_shift': param_list[14]}
         return param_dict
 
     def param_dict_to_list(self, param_dict):
@@ -509,6 +511,10 @@ class Model_fg(Model):
             param_list.append(1.0)
         try:
             param_list.append(param_dict['gamma_s'])
+        except KeyError:
+            param_list.append(0.0)
+        try: #ADD frequency shift 
+            param_list.append(param_dict['freq_shift'])
         except KeyError:
             param_list.append(0.0)
         # Finally done
@@ -600,27 +606,46 @@ class Model_fg(Model):
         if self.maplist[m0].lensing_template or self.maplist[m1].lensing_template:
             pass
         else:
+            #ADDED FREQUENCY SHIFT PARAMETER HANDLING
+            freq_shift = param[14]  # in GHz
+        
+            #worry about shifted bandpasses only if freq_shift is non-zero
+            if freq_shift != 0.0:
+                #shift the bandpass edges for both maps
+                bp0 = Bandpass.tophat(
+                    self.maplist[m0].bandpass.nu.min() + freq_shift,
+                    self.maplist[m0].bandpass.nu.max() + freq_shift
+                )
+                bp1 = Bandpass.tophat(
+                    self.maplist[m1].bandpass.nu.min() + freq_shift,
+                    self.maplist[m1].bandpass.nu.max() + freq_shift
+                )
+            else:
+                #otherwise use original bandpasses
+                bp0 = self.maplist[m0].bandpass
+                bp1 = self.maplist[m1].bandpass
+            
             with np.errstate(divide='ignore'):
                 dust_ell_scale = (ell / self.ell_pivot)**param[1]
                 dust_ell_scale[ell == 0.0] = 0.0
-            fdust0 = self.dust_scale(self.maplist[m0].bandpass, param[2], param[3])
-            fdust1 = self.dust_scale(self.maplist[m1].bandpass, param[2], param[3])
+            fdust0 = self.dust_scale(bp0, param[2], param[3])
+            fdust1 = self.dust_scale(bp1, param[2], param[3])
             if param[10] == 1.0:
                 dust_decorr = np.ones(ell.shape)
             else:
-                dust_decorr = self.decorr(ell, self.maplist[m0].bandpass,
-                                          self.maplist[m1].bandpass,
+                dust_decorr = self.decorr(ell, bp0,
+                                          bp1,
                                           self.dust_pivot, param[10], param[11])
             with np.errstate(divide='ignore'):
                 sync_ell_scale = (ell / self.ell_pivot)**param[6]
                 sync_ell_scale[ell == 0.0] = 0.0
-            fsync0 = self.sync_scale(self.maplist[m0].bandpass, param[7])
-            fsync1 = self.sync_scale(self.maplist[m1].bandpass, param[7])
+            fsync0 = self.sync_scale(bp0, param[7])
+            fsync1 = self.sync_scale(bp1, param[7])
             if param[12] == 1.0:
                 sync_decorr = np.ones(ell.shape)
             else:
-                sync_decorr = self.decorr(ell, self.maplist[m0].bandpass,
-                                          self.maplist[m1].bandpass,
+                sync_decorr = self.decorr(ell, bp0,
+                                          bp1,
                                           self.sync_pivot, param[12], param[13])
             # BB
             BB_d = param[0] * fdust0 * fdust1 * dust_ell_scale * dust_decorr

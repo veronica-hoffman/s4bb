@@ -51,13 +51,13 @@ def starting_guess(field):
                  'A_d': 13.7, 'alpha_d': -0.68, 'beta_d': 1.64, 'T_d': 19.6, 'EEBB_d': 2.0,
                  'A_s': 1.1, 'alpha_s': -1.1, 'beta_s': -3.1, 'EEBB_s': 2.0,
                  'epsilon': 0.025, 'Delta_d': 0.999, 'gamma_d': 0.0,
-                 'Delta_s': 0.999, 'gamma_s': 0.0}
+                 'Delta_s': 0.999, 'gamma_s': 0.0, 'freq_shift': 2.0}
     elif field == 2:
         guess = {'r': 0.0, 'Alens': 1.0,
                  'A_d': 59.5, 'alpha_d': -0.55, 'beta_d': 1.54, 'T_d': 19.6, 'EEBB_d': 2.0,
                  'A_s': 1.1, 'alpha_s': -1.5, 'beta_s': -3.0, 'EEBB_s': 2.0,
                  'epsilon': 0.09, 'Delta_d': 0.997, 'gamma_d': 0.0,
-                 'Delta_s': 0.998, 'gamma_s': 0.0}
+                 'Delta_s': 0.998, 'gamma_s': 0.0, 'freq_shift': 2.0}
     else:
         raise ValueError('field must be 1-2')
     return guess
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                                   noffdiag=args.noffdiag, mask_noise=True)
     
     # Save results  ADDED noffdiag, band bias filesave features
-    savefile = f'mlsearch_bandpass_ghz/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
+    savefile = f'mlsearch_bandpass_fts/ph2_mlsearch_f{args.field}_y{args.year}_n{args.nlat}_diag{args.noffdiag}'
     if args.split:
         savefile += '_split'
     else:
@@ -159,10 +159,11 @@ if __name__ == '__main__':
             'Delta_d', 'Delta_s'] 
     limits = {'beta_d': [1.0, 2.0], 'alpha_d': [-2.0, 0.5],
               'beta_s': [-4.0, -2.0], 'alpha_s': [-2.0, 0.5],
-              'epsilon': [-1,1], 'Delta_d': [0.5,1.1], 'Delta_s': [0.5,1.1]}
+              'epsilon': [-1,1], 'Delta_d': [0.5,1.1], 'Delta_s': [0.5,1.1],
+              'freq_shift': [-5.0, 5.0]}
     method = 'L-BFGS-B'
     options = {'maxls': 30}
-    x = np.zeros(shape=(12,data.shape[2]))
+    x = np.zeros(shape=(13,data.shape[2]))
 
     if bias_type == 'random':
         bias_values = None
@@ -204,6 +205,7 @@ if __name__ == '__main__':
         x[9,i] = result['epsilon']
         x[10,i] = result['Delta_d']
         x[11,i] = result['Delta_s']
+        x[12,i] = result['freq_shift']
     # Done, save results.
     np.save(savefile, x)
     if bias_type == 'random':

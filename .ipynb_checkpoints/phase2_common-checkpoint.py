@@ -174,7 +174,7 @@ def apply_random_bias(bands_dict, bias_std = 0.0, seed = None):
         print(f"  {band_name}: {bias_percent:+.2f}% -> ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
     
     return biased_bands, band_biases
-
+    
 def apply_uniform_ghz_bias(bands_dict, ghz_bias = 0.0):
     if ghz_bias == 0.0:
         return bands_dict
@@ -193,14 +193,14 @@ def apply_uniform_ghz_bias(bands_dict, ghz_bias = 0.0):
         'HF-1': (198.0, 256.0),
         'HF-2': (256.0, 315.0)
     }
-    print(f"Applied {ghz_bias:+.1f} GHz uniform shift to all bands:")
+    #print(f"Applied {ghz_bias:+.1f} GHz uniform bias to all bands:")
     for band_name in original_bandpasses.keys():
         nu_min, nu_max = original_bandpasses[band_name]
-        new_nu_min = nu_min + ghz_shift
-        new_nu_max = nu_max + ghz_shift
+        new_nu_min = nu_min + ghz_bias
+        new_nu_max = nu_max + ghz_bias
         biased_bands[band_name]['bandpass'] = Bandpass.tophat(new_nu_min, new_nu_max)
-        print(f"  {band_name}: ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
-    return biased_bands
+        #print(f"  {band_name}: ({nu_min:.1f}, {nu_max:.1f}) -> ({new_nu_min:.1f}, {new_nu_max:.1f}) GHz")
+    return biased_bands    
 
 # Ell bins: delta-ell=20, starting from ell=30
 bin_low = np.arange(30, 500, 20)
@@ -536,12 +536,28 @@ def get_bias(field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
     # Done
     return bias
 
-def get_likelihood(field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False):
+#Foreground model that includes FTS misalignment
+class Model_fg_with_fts(Model_fg):
+    def __init__(self, maplist, bpwf, original_bands=None):
+        super().__init__(maplist, bpwf)
+        self.original_bands = original_bands or bands.copy()
+        self.current_fts_ghz_shift = 0.0
+    def expv(self, param, include_bias = True):
+        fts_ghz_shift = param.get('fts_ghz_shift', 0.0)
+        if fts_ghz_shift != self.current_fts_ghz_shift:
+            self.current_fts_ghz_shift = fts_ghz_shift
+            misaligned_bands = apply_uniform_ghz_bias(self.original_bands, fts_ghz_shift)
+            for m in self.maplist:
+                if m.name in misaligned_bands and misaligned_bands[m.name]['bandpass'] is not None:
+                    m.bandpass = misaligned_bands[m.name]['bandpass']
+        return super().expv(param)
+
+def get_likelihood(field, yr, nlat, rlz0, rlz1, split_bands=True, pbscaling=False, original_bands=None):
     """Get likelihood object"""
     bias = get_bias(field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     bpcm = get_bpcm(field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     wf = get_bpwf(field, split_bands=split_bands)
     adjust_bpwf(wf, field, yr, nlat, rlz0, rlz1, split_bands=split_bands, pbscaling=pbscaling)
     mod0 = get_cmb_model(wf)
-    mod1 = Model_fg(wf.maplist, wf)
+    mod1 = Model_fg_with_fts(wf.maplist, wf, original_bands=original_bands or bands)
     return Likelihood(bias.maplist, bias=bias, bpcm=bpcm, models=[mod0, mod1])
